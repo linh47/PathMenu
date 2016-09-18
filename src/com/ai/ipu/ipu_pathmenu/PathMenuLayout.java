@@ -18,7 +18,7 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 
 /**
- * 子菜单项布局 
+ * 子菜单项布局
  * 
  * @author 何凌波
  *
@@ -69,7 +69,15 @@ public class PathMenuLayout extends ViewGroup {
 		if (childCount < 2) {
 			return minRadius;
 		}
-		final float perDegrees = arcDegrees / (childCount - 1);
+		final float perDegrees;
+		if(arcDegrees<360)
+		{
+			 perDegrees = arcDegrees / (childCount - 1);
+		}else
+		{
+			 perDegrees = arcDegrees / (childCount);
+		}
+		
 		final float perHalfDegrees = perDegrees / 2;
 		final int perSize = childSize + childPadding;
 
@@ -91,12 +99,12 @@ public class PathMenuLayout extends ViewGroup {
 	 */
 	private static Rect computeChildFrame(final int centerX, final int centerY,
 			final int radius, final float degrees, final int size) {
-		//子菜单项中心点
+		// 子菜单项中心点
 		final double childCenterX = centerX + radius
 				* Math.cos(Math.toRadians(degrees));
 		final double childCenterY = centerY + radius
 				* Math.sin(Math.toRadians(degrees));
-		//子菜单项的左上角，右上角，左下角，右下角
+		// 子菜单项的左上角，右上角，左下角，右下角
 		return new Rect((int) (childCenterX - size / 2),
 				(int) (childCenterY - size / 2),
 				(int) (childCenterX + size / 2),
@@ -109,15 +117,14 @@ public class PathMenuLayout extends ViewGroup {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		DisplayMetrics dm = getResources().getDisplayMetrics();
-		int screenWidth=dm.widthPixels;
+		int screenWidth = dm.widthPixels;
 		int radius = mRadius = computeRadius(
 				Math.abs(mToDegrees - mFromDegrees), getChildCount(),
 				mChildSize, mChildPadding, MIN_RADIUS);
-		Log.i("layout", "radius:"+radius);
+		Log.i("layout", "radius:" + radius);
 
-		int size = radius * 2 + mChildSize + mChildPadding
-				+ mLayoutPadding * 2;
-		Log.i("layout", "size:"+size);
+		int size = radius * 2 + mChildSize + mChildPadding + mLayoutPadding * 2;
+		Log.i("layout", "size:" + size);
 
 		setMeasuredDimension(size, size);
 
@@ -139,11 +146,15 @@ public class PathMenuLayout extends ViewGroup {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		final int centerX = getWidth() / 2;
 		final int centerY = getHeight() / 2;
-		//当子菜单要收缩时radius=0，在ViewGroup坐标中心
+		// 当子菜单要收缩时radius=0，在ViewGroup坐标中心
 		final int radius = mExpanded ? mRadius : 0;
-		
+		final float perDegrees;// 菜单项之间的角度
 		final int childCount = getChildCount();
-		final float perDegrees = (mToDegrees - mFromDegrees) / (childCount - 1);
+		if (mToDegrees - mFromDegrees >= 360) {
+			perDegrees = (mToDegrees - mFromDegrees) / (childCount);
+		} else {
+			perDegrees = (mToDegrees - mFromDegrees) / (childCount - 1);
+		}
 
 		float degrees = mFromDegrees;
 		for (int i = 0; i < childCount; i++) {
@@ -223,7 +234,7 @@ public class PathMenuLayout extends ViewGroup {
 	}
 
 	/**
-	 *  收缩动画
+	 * 收缩动画
 	 * 
 	 * @param fromXDelta
 	 * @param toXDelta
@@ -239,7 +250,7 @@ public class PathMenuLayout extends ViewGroup {
 			long duration, Interpolator interpolator) {
 		AnimationSet animationSet = new AnimationSet(false);
 		animationSet.setFillAfter(true);
-		//收缩过程中，child 逆时针自旋转360度
+		// 收缩过程中，child 逆时针自旋转360度
 		final long preDuration = duration / 2;
 		Animation rotateAnimation = new RotateAnimation(0, 360,
 				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
@@ -250,7 +261,7 @@ public class PathMenuLayout extends ViewGroup {
 		rotateAnimation.setFillAfter(true);
 
 		animationSet.addAnimation(rotateAnimation);
-		//收缩过程中位移，并逆时针旋转360度
+		// 收缩过程中位移，并逆时针旋转360度
 		Animation translateAnimation = new RotateAndTranslateAnimation(0,
 				toXDelta, 0, toYDelta, 360, 720);
 		translateAnimation.setStartOffset(startOffset + preDuration);
@@ -273,24 +284,29 @@ public class PathMenuLayout extends ViewGroup {
 	private void bindChildAnimation(final View child, final int index,
 			final long duration) {
 		final boolean expanded = mExpanded;
-		final int centerX = getWidth() / 2;  //ViewGroup的中心X坐标
-		final int centerY = getHeight() / 2;  
+		final int centerX = getWidth() / 2; // ViewGroup的中心X坐标
+		final int centerY = getHeight() / 2;
 		final int radius = expanded ? 0 : mRadius;
 
 		final int childCount = getChildCount();
-		final float perDegrees = (mToDegrees - mFromDegrees) / (childCount - 1);
+		final float perDegrees ;
+		if (mToDegrees - mFromDegrees >= 360) {
+			perDegrees = (mToDegrees - mFromDegrees) / (childCount);
+		} else {
+			perDegrees = (mToDegrees - mFromDegrees) / (childCount - 1);
+		}
 		Rect frame = computeChildFrame(centerX, centerY, radius, mFromDegrees
 				+ index * perDegrees, mChildSize);
 
-		final int toXDelta = frame.left - child.getLeft();//展开或收缩动画,child沿X轴位移距离
-		final int toYDelta = frame.top - child.getTop();//展开或收缩动画,child沿Y轴位移距离
+		final int toXDelta = frame.left - child.getLeft();// 展开或收缩动画,child沿X轴位移距离
+		final int toYDelta = frame.top - child.getTop();// 展开或收缩动画,child沿Y轴位移距离
 
 		Interpolator interpolator = mExpanded ? new AccelerateInterpolator()
 				: new OvershootInterpolator(1.5f);
 		final long startOffset = computeStartOffset(childCount, mExpanded,
 				index, 0.1f, duration, interpolator);
-		
-		//mExpanded为true，已经展开，收缩动画；为false,展开动画
+
+		// mExpanded为true，已经展开，收缩动画；为false,展开动画
 		Animation animation = mExpanded ? createShrinkAnimation(0, toXDelta, 0,
 				toYDelta, startOffset, duration, interpolator)
 				: createExpandAnimation(0, toXDelta, 0, toYDelta, startOffset,

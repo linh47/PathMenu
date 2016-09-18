@@ -42,11 +42,8 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 	private int mScreenWidth;// 屏幕宽度
 	private int mScreenHeight;// 屏幕高度
 	private boolean mDraging;// 是否拖动中
-
+	private boolean mExpanded = false;// 子菜单是否展开
 	private Context mContext;
-
-	private int btnWidth;// 按钮宽度
-	private int btnHeight;// 按钮高度
 
 	private int position;// 按钮的位置
 	private int LEFT_TOP = 1;
@@ -122,8 +119,6 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 		controlLayout.setClickable(true);
 		controlLayout.setOnTouchListener(this);
 
-		btnWidth = controlLayout.getLayoutParams().width;
-		btnHeight = controlLayout.getLayoutParams().height;
 		mHintView = (ImageView) findViewById(R.id.control_hint);
 		mWindowManager.addView(this, mWmParams);
 		initPathMenu(this, ITEM_DRAWABLES);// 初始化子菜单
@@ -322,57 +317,60 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 		case MotionEvent.ACTION_MOVE:
 			float mMoveStartX = event.getX();
 			float mMoveStartY = event.getY();
-			if (Math.abs(mTouchStartX - mMoveStartX) > 3
-					&& Math.abs(mTouchStartY - mMoveStartY) > 3) {
-				mDraging = true;
-				mWmParams.x = (int) (x - mTouchStartX);
-				mWmParams.y = (int) (y - mTouchStartY);
-				mWindowManager.updateViewLayout(this, mWmParams);
-				return false;
-			}
+				if (Math.abs(mTouchStartX - mMoveStartX) > 2
+
+				&& Math.abs(mTouchStartY - mMoveStartY) > 2) {
+					mDraging = true;
+					mWmParams.x = (int) (x - mTouchStartX);
+					mWmParams.y = (int) (y - mTouchStartY);
+					mWindowManager.updateViewLayout(this, mWmParams);
+					return false;
+				}
 			break;
 
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_CANCEL:
 			int wmX = mWmParams.x;
 			int wmY = mWmParams.y;
-			if (wmX <= mScreenWidth / 4) //左边  竖区域
-			{
-				if (wmY <= mScreenHeight / 4) {
-					position = LEFT_TOP;//左上
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
-					position = LEFT_CENTER;//左中
-				} else if (wmY >= mScreenHeight * 3 / 4) {
-					position = LEFT_BOTTOM;//左下
+				if (wmX <= mScreenWidth / 4) // 左边 竖区域
+				{
+					if (wmY <= mScreenHeight / 4) {
+						position = LEFT_TOP;// 左上
+					} else if (wmY >= mScreenHeight / 4
+							&& wmY <= mScreenHeight * 3 / 4) {
+						position = LEFT_CENTER;// 左中
+					} else if (wmY >= mScreenHeight * 3 / 4) {
+						position = LEFT_BOTTOM;// 左下
+					}
+				} else if (wmX >= mScreenWidth / 4
+						&& wmX <= mScreenWidth * 3 / 4)// 中间
+														// 竖区域
+				{
+					if (wmY <= mScreenHeight / 4) {
+						position = CENTER_TOP;// 中上
+					} else if (wmY >= mScreenHeight / 4
+							&& wmY <= mScreenHeight * 3 / 4) {
+						position = CENTER;// 中
+					} else if (wmY >= mScreenHeight * 3 / 4) {
+						position = CENTER_BOTTOM;// 中下
+					}
 				}
-			}
-			else if(wmX>=mScreenWidth / 4 && wmX<=mScreenWidth *3/4)//中间 竖区域
-			{
-				if (wmY <= mScreenHeight / 4) {
-					position = CENTER_TOP;//中上
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
-					position = CENTER;//中
-				} else if (wmY >= mScreenHeight * 3 / 4) {
-					position = CENTER_BOTTOM;//中下
+
+				else if (wmX >= mScreenWidth * 3 / 4)// 右边竖区域
+				{
+					if (wmY <= mScreenHeight / 4) {
+						position = RIGHT_TOP;// 上右
+					} else if (wmY >= mScreenHeight / 4
+							&& wmY <= mScreenHeight * 3 / 4) {
+						position = RIGHT_CENTER;// 中右
+					} else if (wmY >= mScreenHeight * 3 / 4) {
+						position = RIGHT_BOTTOM;// 下右
+					}
 				}
-			}
-			
-			else if(wmX>=mScreenWidth *3/4)//右边竖区域
-			{
-				if (wmY <= mScreenHeight / 4) {
-					position = RIGHT_TOP;//上右
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
-					position = RIGHT_CENTER;//中右
-				} else if (wmY >= mScreenHeight * 3 / 4) {
-					position = RIGHT_BOTTOM;//下右
-				}
-			}
-			refreshPathMenu(position);
-			mWindowManager.updateViewLayout(this, mWmParams);
-			mTouchStartX = mTouchStartY = 0;
+				refreshPathMenu(position);
+
+				mWindowManager.updateViewLayout(this, mWmParams);
+				mTouchStartX = mTouchStartY = 0;
 			break;
 		}
 		return false;
