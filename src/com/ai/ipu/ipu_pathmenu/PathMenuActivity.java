@@ -3,20 +3,37 @@ package com.ai.ipu.ipu_pathmenu;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 public class PathMenuActivity extends Activity {
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_float);
-		PathMenu pathMenu =new PathMenu(getApplicationContext());
+		Button btnOpen = (Button) findViewById(R.id.btnOpenFloat);
+		Button btnClose = (Button) findViewById(R.id.btnCloseFloat);
+
+		btnOpen.setOnClickListener(mClickListener);
+		btnClose.setOnClickListener(mClickListener);
+
 	}
+
+	OnClickListener mClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (v.getId() == R.id.btnOpenFloat) {
+				Intent intent = new Intent(PathMenuActivity.this,
+						PathMenuService.class);
+				startService(intent);
+			} else if (v.getId() == R.id.btnCloseFloat) {
+				Intent intent = new Intent(PathMenuActivity.this,
+						PathMenuService.class);
+				stopService(intent);
+			}
+		}
+	};
 }

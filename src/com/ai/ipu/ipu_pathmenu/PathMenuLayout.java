@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -116,15 +114,11 @@ public class PathMenuLayout extends ViewGroup {
 	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		DisplayMetrics dm = getResources().getDisplayMetrics();
-		int screenWidth = dm.widthPixels;
 		int radius = mRadius = computeRadius(
 				Math.abs(mToDegrees - mFromDegrees), getChildCount(),
 				mChildSize, mChildPadding, MIN_RADIUS);
-		Log.i("layout", "radius:" + radius);
 
 		int size = radius * 2 + mChildSize + mChildPadding + mLayoutPadding * 2;
-		Log.i("layout", "size:" + size);
 
 		setMeasuredDimension(size, size);
 

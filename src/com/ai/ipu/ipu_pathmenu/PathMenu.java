@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,7 +23,6 @@ import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 /**
  * 自定义菜单
@@ -56,10 +56,6 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 	private int CENTER_BOTTOM = 8;
 	private int RIGHT_BOTTOM = 9;
 
-	private static final int[] ITEM_DRAWABLES = { R.drawable.composer_camera,
-			R.drawable.composer_music, R.drawable.composer_place,
-			R.drawable.composer_sleep, R.drawable.composer_thought,
-			R.drawable.composer_with };
 
 	public PathMenu(Context context) {
 		super(context);
@@ -121,7 +117,7 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 
 		mHintView = (ImageView) findViewById(R.id.control_hint);
 		mWindowManager.addView(this, mWmParams);
-		initPathMenu(this, ITEM_DRAWABLES);// 初始化子菜单
+		
 
 		controlLayout.setOnClickListener(new OnClickListener() {
 			@Override
@@ -404,35 +400,13 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 
 	}
 
-	/**
-	 * 初始化子菜单图片、点击事件
-	 * 
-	 * @param menu
-	 * @param itemDrawables
-	 */
-	private void initPathMenu(PathMenu menu, int[] itemDrawables) {
-		final int itemCount = itemDrawables.length;
-		for (int i = 0; i < itemCount; i++) {
-			ImageView item = new ImageView(mContext);
-			item.setImageResource(itemDrawables[i]);
-			final int index = i;
-			menu.addItem(item, new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					switch (index) {
-					case 0:
-						Toast.makeText(getContext(), "第0个被点击",
-								Toast.LENGTH_SHORT).show();
-						break;
-
-					case 1:
-						Toast.makeText(getContext(), "第1个被点击",
-								Toast.LENGTH_SHORT).show();
-						break;
-					}
-				}
-			});
+	
+	public void hidePathMenu()
+	{
+		try {
+			 setVisibility(View.GONE);
+		} catch (final IllegalArgumentException e) {
+			Log.e("PathMenu", "hidePathMenu error!");
 		}
 	}
 }
