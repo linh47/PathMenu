@@ -32,6 +32,55 @@ public class PathMenuLayout extends ViewGroup {
 	private static final int MIN_RADIUS = 100;
 	private int mRadius;// 中心菜单圆点到子菜单中心的距离
 	private boolean mExpanded = false;
+	private int position = PathMenu.LEFT_TOP;
+	private int centerX = 0;
+	private int centerY = 0;
+
+	public void computeCenterXY(int position) {
+		switch (position) {
+		case PathMenu.LEFT_TOP:// 左上
+			centerX = getWidth() / 2 - getRadiusAndPadding();
+			centerY = getHeight() / 2 - getRadiusAndPadding();
+			break;
+		case PathMenu.LEFT_CENTER:// 左中
+			centerX = getWidth() / 2 - getRadiusAndPadding();
+			centerY = getHeight() / 2;
+			break;
+		case PathMenu.LEFT_BOTTOM:// 左下
+			centerX = getWidth() / 2 - getRadiusAndPadding();
+			centerY = getHeight() / 2 + getRadiusAndPadding();
+			break;
+		case PathMenu.CENTER_TOP:// 上中
+			centerX = getWidth() / 2;
+			centerY = getHeight() / 2 - getRadiusAndPadding();
+			break;
+		case PathMenu.CENTER_BOTTOM:// 下中
+			centerX = getWidth() / 2;
+			centerY = getHeight() / 2 + getRadiusAndPadding();
+			break;
+		case PathMenu.RIGHT_TOP:// 右上
+			centerX = getWidth() / 2 + getRadiusAndPadding();
+			centerY = getHeight() / 2 - getRadiusAndPadding();
+			break;
+		case PathMenu.RIGHT_CENTER:// 右中
+			centerX = getWidth() / 2 + getRadiusAndPadding();
+			centerY = getHeight() / 2;
+			break;
+		case PathMenu.RIGHT_BOTTOM:// 右下
+			centerX = getWidth() / 2 + getRadiusAndPadding();
+			centerY = getHeight() / 2 + getRadiusAndPadding();
+			break;
+
+		case PathMenu.CENTER:
+			centerX = getWidth() / 2;
+			centerY = getHeight() / 2;
+			break;
+		}
+	}
+
+	private int getRadiusAndPadding() {
+		return mRadius + (mChildPadding * 2);
+	}
 
 	public PathMenuLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -68,14 +117,12 @@ public class PathMenuLayout extends ViewGroup {
 			return minRadius;
 		}
 		final float perDegrees;
-		if(arcDegrees<360)
-		{
-			 perDegrees = arcDegrees / (childCount - 1);
-		}else
-		{
-			 perDegrees = arcDegrees / (childCount);
+		if (arcDegrees < 360) {
+			perDegrees = arcDegrees / (childCount - 1);
+		} else {
+			perDegrees = arcDegrees / (childCount);
 		}
-		
+
 		final float perHalfDegrees = perDegrees / 2;
 		final int perSize = childSize + childPadding;
 
@@ -138,8 +185,7 @@ public class PathMenuLayout extends ViewGroup {
 	 */
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		final int centerX = getWidth() / 2;
-		final int centerY = getHeight() / 2;
+		computeCenterXY(position);
 		// 当子菜单要收缩时radius=0，在ViewGroup坐标中心
 		final int radius = mExpanded ? mRadius : 0;
 		final float perDegrees;// 菜单项之间的角度
@@ -278,12 +324,11 @@ public class PathMenuLayout extends ViewGroup {
 	private void bindChildAnimation(final View child, final int index,
 			final long duration) {
 		final boolean expanded = mExpanded;
-		final int centerX = getWidth() / 2; // ViewGroup的中心X坐标
-		final int centerY = getHeight() / 2;
+		computeCenterXY(position);
 		final int radius = expanded ? 0 : mRadius;
 
 		final int childCount = getChildCount();
-		final float perDegrees ;
+		final float perDegrees;
 		if (mToDegrees - mFromDegrees >= 360) {
 			perDegrees = (mToDegrees - mFromDegrees) / (childCount);
 		} else {
@@ -341,21 +386,34 @@ public class PathMenuLayout extends ViewGroup {
 	}
 
 	/**
-	 * 设定弧度
-	 * 
-	 * @param fromDegrees
-	 * @param toDegrees
-	 */
-	public void setArc(float fromDegrees, float toDegrees) {
-		if (mFromDegrees == fromDegrees && mToDegrees == toDegrees) {
-			return;
-		}
+     * 设定弧度
+     */
+    public void setArc(float fromDegrees, float toDegrees, int position) {
+        this.position = position;
+        if (mFromDegrees == fromDegrees && mToDegrees == toDegrees) {
+            return;
+        }
 
-		mFromDegrees = fromDegrees;
-		mToDegrees = toDegrees;
+        mFromDegrees = fromDegrees;
+        mToDegrees = toDegrees;
+        computeCenterXY(position);
+        requestLayout();
+    }
 
-		requestLayout();
-	}
+    /**
+     * 设定弧度
+     */
+    public void setArc(float fromDegrees, float toDegrees) {
+        if (mFromDegrees == fromDegrees && mToDegrees == toDegrees) {
+            return;
+        }
+
+        mFromDegrees = fromDegrees;
+        mToDegrees = toDegrees;
+        computeCenterXY(position);
+        requestLayout();
+    }
+
 
 	/**
 	 * 设定子菜单项大小

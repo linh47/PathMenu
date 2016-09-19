@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -21,8 +20,8 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 /**
  * 自定义菜单
@@ -30,8 +29,9 @@ import android.widget.RelativeLayout;
  * @author 何凌波
  *
  */
-public class PathMenu extends RelativeLayout implements OnTouchListener {
+public class PathMenu extends FrameLayout implements OnTouchListener {
 	private PathMenuLayout mPathMenuLayout;
+	private FrameLayout controlLayout;
 	private ImageView mHintView;// 中心按钮显示图片
 	private WindowManager mWindowManager;// 当前view的窗口管理器
 	// WindowMananger的params，控制这个值可以将自定义的view设置到窗口管理器中
@@ -46,16 +46,15 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 	private Context mContext;
 
 	private int position;// 按钮的位置
-	private int LEFT_TOP = 1;
-	private int CENTER_TOP = 2;
-	private int RIGHT_TOP = 3;
-	private int LEFT_CENTER = 4;
-	private int CENTER = 5;
-	private int RIGHT_CENTER = 6;
-	private int LEFT_BOTTOM = 7;
-	private int CENTER_BOTTOM = 8;
-	private int RIGHT_BOTTOM = 9;
-
+	public static final int LEFT_TOP = 1;
+	public static final int CENTER_TOP = 2;
+	public static final int RIGHT_TOP = 3;
+	public static final int LEFT_CENTER = 4;
+	public static final int CENTER = 5;
+	public static final int RIGHT_CENTER = 6;
+	public static final int LEFT_BOTTOM = 7;
+	public static final int CENTER_BOTTOM = 8;
+	public static final int RIGHT_BOTTOM = 9;
 
 	public PathMenu(Context context) {
 		super(context);
@@ -111,13 +110,12 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 		mWmParams.height = LayoutParams.WRAP_CONTENT;
 
 		mPathMenuLayout = (PathMenuLayout) findViewById(R.id.item_layout);
-		final ViewGroup controlLayout = (ViewGroup) findViewById(R.id.control_layout);
+		controlLayout = (FrameLayout) findViewById(R.id.control_layout);
 		controlLayout.setClickable(true);
 		controlLayout.setOnTouchListener(this);
 
 		mHintView = (ImageView) findViewById(R.id.control_hint);
 		mWindowManager.addView(this, mWmParams);
-		
 
 		controlLayout.setOnClickListener(new OnClickListener() {
 			@Override
@@ -313,60 +311,59 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 		case MotionEvent.ACTION_MOVE:
 			float mMoveStartX = event.getX();
 			float mMoveStartY = event.getY();
-				if (Math.abs(mTouchStartX - mMoveStartX) > 2
+			if (Math.abs(mTouchStartX - mMoveStartX) > 2
 
-				&& Math.abs(mTouchStartY - mMoveStartY) > 2) {
-					mDraging = true;
-					mWmParams.x = (int) (x - mTouchStartX);
-					mWmParams.y = (int) (y - mTouchStartY);
-					mWindowManager.updateViewLayout(this, mWmParams);
-					return false;
-				}
+			&& Math.abs(mTouchStartY - mMoveStartY) > 2) {
+				mDraging = true;
+				mWmParams.x = (int) (x - mTouchStartX);
+				mWmParams.y = (int) (y - mTouchStartY);
+				mWindowManager.updateViewLayout(this, mWmParams);
+				return false;
+			}
 			break;
 
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_CANCEL:
 			int wmX = mWmParams.x;
 			int wmY = mWmParams.y;
-				if (wmX <= mScreenWidth / 4) // 左边 竖区域
-				{
-					if (wmY <= mScreenHeight / 4) {
-						position = LEFT_TOP;// 左上
-					} else if (wmY >= mScreenHeight / 4
-							&& wmY <= mScreenHeight * 3 / 4) {
-						position = LEFT_CENTER;// 左中
-					} else if (wmY >= mScreenHeight * 3 / 4) {
-						position = LEFT_BOTTOM;// 左下
-					}
-				} else if (wmX >= mScreenWidth / 4
-						&& wmX <= mScreenWidth * 3 / 4)// 中间
-														// 竖区域
-				{
-					if (wmY <= mScreenHeight / 4) {
-						position = CENTER_TOP;// 中上
-					} else if (wmY >= mScreenHeight / 4
-							&& wmY <= mScreenHeight * 3 / 4) {
-						position = CENTER;// 中
-					} else if (wmY >= mScreenHeight * 3 / 4) {
-						position = CENTER_BOTTOM;// 中下
-					}
+			if (wmX <= mScreenWidth / 4) // 左边 竖区域
+			{
+				if (wmY <= mScreenHeight / 4) {
+					position = LEFT_TOP;// 左上
+				} else if (wmY >= mScreenHeight / 4
+						&& wmY <= mScreenHeight * 3 / 4) {
+					position = LEFT_CENTER;// 左中
+				} else if (wmY >= mScreenHeight * 3 / 4) {
+					position = LEFT_BOTTOM;// 左下
 				}
-
-				else if (wmX >= mScreenWidth * 3 / 4)// 右边竖区域
-				{
-					if (wmY <= mScreenHeight / 4) {
-						position = RIGHT_TOP;// 上右
-					} else if (wmY >= mScreenHeight / 4
-							&& wmY <= mScreenHeight * 3 / 4) {
-						position = RIGHT_CENTER;// 中右
-					} else if (wmY >= mScreenHeight * 3 / 4) {
-						position = RIGHT_BOTTOM;// 下右
-					}
+			} else if (wmX >= mScreenWidth / 4 && wmX <= mScreenWidth * 3 / 4)// 中间
+																				// 竖区域
+			{
+				if (wmY <= mScreenHeight / 4) {
+					position = CENTER_TOP;// 中上
+				} else if (wmY >= mScreenHeight / 4
+						&& wmY <= mScreenHeight * 3 / 4) {
+					position = CENTER;// 中
+				} else if (wmY >= mScreenHeight * 3 / 4) {
+					position = CENTER_BOTTOM;// 中下
 				}
-				refreshPathMenu(position);
+			}
 
-				mWindowManager.updateViewLayout(this, mWmParams);
-				mTouchStartX = mTouchStartY = 0;
+			else if (wmX >= mScreenWidth * 3 / 4)// 右边竖区域
+			{
+				if (wmY <= mScreenHeight / 4) {
+					position = RIGHT_TOP;// 上右
+				} else if (wmY >= mScreenHeight / 4
+						&& wmY <= mScreenHeight * 3 / 4) {
+					position = RIGHT_CENTER;// 中右
+				} else if (wmY >= mScreenHeight * 3 / 4) {
+					position = RIGHT_BOTTOM;// 下右
+				}
+			}
+			refreshPathMenu(position);
+
+			mWindowManager.updateViewLayout(this, mWmParams);
+			mTouchStartX = mTouchStartY = 0;
 			break;
 		}
 		return false;
@@ -378,33 +375,81 @@ public class PathMenu extends RelativeLayout implements OnTouchListener {
 	 * @param position
 	 */
 	private void refreshPathMenu(int position) {
-		if (position == LEFT_TOP) {// 上左
-			mPathMenuLayout.setArc(0, 90);
-		} else if (position == CENTER_TOP) {// 上中
-			mPathMenuLayout.setArc(0, 180);
-		} else if (position == RIGHT_TOP) {// 上右
-			mPathMenuLayout.setArc(90, 180);
-		} else if (position == LEFT_CENTER) {// 中左
-			mPathMenuLayout.setArc(270, 270 + 180);
-		} else if (position == CENTER) {// 中
-			mPathMenuLayout.setArc(0, 360);
-		} else if (position == RIGHT_CENTER) {// 中右
-			mPathMenuLayout.setArc(90, 270);
-		} else if (position == LEFT_BOTTOM) { // 下左
-			mPathMenuLayout.setArc(270, 360);
-		} else if (position == CENTER_BOTTOM) {// 下中
-			mPathMenuLayout.setArc(180, 360);
-		} else if (position == RIGHT_BOTTOM) {// 下右
-			mPathMenuLayout.setArc(180, 270);
+		FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mPathMenuLayout
+				.getLayoutParams();
+		FrameLayout.LayoutParams params1 = (FrameLayout.LayoutParams) controlLayout
+				.getLayoutParams();
+
+		switch (position) {
+		case PathMenu.LEFT_TOP:// 左上
+			params1.gravity = Gravity.LEFT | Gravity.TOP;
+			params.gravity = Gravity.LEFT | Gravity.TOP;
+			mPathMenuLayout.setArc(0, 90, position);
+			break;
+		case PathMenu.LEFT_CENTER:// 左中
+			params1.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+			params.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+			mPathMenuLayout.setArc(270, 270 + 180, position);
+			break;
+		case PathMenu.LEFT_BOTTOM:// 左下
+			params1.gravity = Gravity.LEFT | Gravity.BOTTOM;
+			params.gravity = Gravity.LEFT | Gravity.BOTTOM;
+			mPathMenuLayout.setArc(270, 360, position);
+			break;
+		case PathMenu.RIGHT_TOP:// 右上
+			params1.gravity = Gravity.RIGHT | Gravity.TOP;
+			params.gravity = Gravity.RIGHT | Gravity.TOP;
+			mPathMenuLayout.setArc(90, 180, position);
+			break;
+		case PathMenu.RIGHT_CENTER:// 右中
+			params1.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+			params.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+			mPathMenuLayout.setArc(90, 270, position);
+			break;
+		case PathMenu.RIGHT_BOTTOM:// 右下
+			params1.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+			params.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+			mPathMenuLayout.setArc(180, 270, position);
+			break;
+
+		case PathMenu.CENTER_TOP:// 上中
+			params1.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+			params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+			mPathMenuLayout.setArc(0, 180, position);
+			break;
+		case PathMenu.CENTER_BOTTOM:// 下中
+			params1.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+			params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+			mPathMenuLayout.setArc(180, 360, position);
+			break;
+		case PathMenu.CENTER:
+			params1.gravity = Gravity.CENTER;
+			params.gravity = Gravity.CENTER;
+			mPathMenuLayout.setArc(0, 360, position);
+			break;
 		}
+		controlLayout.setLayoutParams(params1);
+		mPathMenuLayout.setLayoutParams(params);
 
 	}
 
-	
-	public void hidePathMenu()
-	{
+	int statusBarHeight = 0;
+
+	public int getStatusBarHeight() {
+		if (statusBarHeight <= 0) {
+			int resourceId = getResources().getIdentifier("status_bar_height",
+					"dimen", "android");
+			if (resourceId > 0) {
+				statusBarHeight = getResources().getDimensionPixelSize(
+						resourceId);
+			}
+		}
+		return statusBarHeight;
+	}
+
+	public void hidePathMenu() {
 		try {
-			 setVisibility(View.GONE);
+			setVisibility(View.GONE);
 		} catch (final IllegalArgumentException e) {
 			Log.e("PathMenu", "hidePathMenu error!");
 		}
