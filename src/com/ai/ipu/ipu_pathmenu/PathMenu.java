@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -115,6 +117,7 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 		controlLayout.setOnTouchListener(this);
 
 		mHintView = (ImageView) findViewById(R.id.control_hint);
+		
 		mWindowManager.addView(this, mWmParams);
 
 		controlLayout.setOnClickListener(new OnClickListener() {
@@ -128,6 +131,17 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 				}
 			}
 		});
+		//必须在绘制完成后才能获得控件的宽高
+		ViewTreeObserver vto = controlLayout.getViewTreeObserver();   
+        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() { 
+            @Override  
+            public void onGlobalLayout() { 
+            	controlLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this); 
+            	int controlLayoutWidth=controlLayout.getWidth();
+            	Log.i("menu", "controlLayoutWidth:"+controlLayoutWidth);
+            	mPathMenuLayout.setChildSize(controlLayoutWidth);
+            }   
+        });
 	}
 
 	/**
@@ -145,12 +159,6 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 			float toDegrees = a.getFloat(R.styleable.ArcLayout_toDegrees,
 					PathMenuLayout.DEFAULT_TO_DEGREES);
 			mPathMenuLayout.setArc(fromDegrees, toDegrees);
-
-			int defaultChildSize = mPathMenuLayout.getChildSize();
-
-			int newChildSize = a.getDimensionPixelSize(
-					R.styleable.ArcLayout_childSize, defaultChildSize);
-			mPathMenuLayout.setChildSize(newChildSize);
 			a.recycle();
 		}
 	}
@@ -326,37 +334,37 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 		case MotionEvent.ACTION_CANCEL:
 			int wmX = mWmParams.x;
 			int wmY = mWmParams.y;
-			if (wmX <= mScreenWidth / 4) // 左边 竖区域
+			if (wmX <= mScreenWidth / 8) // 左边 竖区域
 			{
-				if (wmY <= mScreenHeight / 4) {
+				if (wmY <= mScreenHeight / 8) {
 					position = LEFT_TOP;// 左上
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight / 8
+						&& wmY <= mScreenHeight * 7 / 8) {
 					position = LEFT_CENTER;// 左中
-				} else if (wmY >= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight * 7 / 8) {
 					position = LEFT_BOTTOM;// 左下
 				}
-			} else if (wmX >= mScreenWidth / 4 && wmX <= mScreenWidth * 3 / 4)// 中间
+			} else if (wmX >= mScreenWidth / 8 && wmX <= mScreenWidth * 7 / 8)// 中间
 																				// 竖区域
 			{
-				if (wmY <= mScreenHeight / 4) {
+				if (wmY <= mScreenHeight / 8) {
 					position = CENTER_TOP;// 中上
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight / 8
+						&& wmY <= mScreenHeight * 7 / 8) {
 					position = CENTER;// 中
-				} else if (wmY >= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight * 7 / 8) {
 					position = CENTER_BOTTOM;// 中下
 				}
 			}
 
-			else if (wmX >= mScreenWidth * 3 / 4)// 右边竖区域
+			else if (wmX >= mScreenWidth * 7 / 8)// 右边竖区域
 			{
-				if (wmY <= mScreenHeight / 4) {
+				if (wmY <= mScreenHeight / 8) {
 					position = RIGHT_TOP;// 上右
-				} else if (wmY >= mScreenHeight / 4
-						&& wmY <= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight / 8
+						&& wmY <= mScreenHeight * 7 / 8) {
 					position = RIGHT_CENTER;// 中右
-				} else if (wmY >= mScreenHeight * 3 / 4) {
+				} else if (wmY >= mScreenHeight * 7 / 8) {
 					position = RIGHT_BOTTOM;// 下右
 				}
 			}
