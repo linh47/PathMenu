@@ -433,7 +433,32 @@ public class PathMenuLayout extends ViewGroup {
 	public int getChildSize() {
 		return mChildSize;
 	}
+	
+	public void setPosition(int position) {
+        this.position = position;
+        computeCenterXY(position);
+        invalidate();
+    }
+	 /**
+     * 切换中心按钮的展开缩小
+     */
+    public void switchState(final boolean showAnimation, int position) {
+        this.position = position;
+        if (showAnimation) {
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                bindChildAnimation(getChildAt(i), i, 300);
+            }
+        }
 
+        mExpanded = !mExpanded;
+
+        if (!showAnimation) {
+            requestLayout();
+        }
+
+        invalidate();
+    }
 	/**
 	 * 切换中心按钮的展开缩小
 	 * 

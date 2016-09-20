@@ -44,7 +44,6 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 	private int mScreenWidth;// 屏幕宽度
 	private int mScreenHeight;// 屏幕高度
 	private boolean mDraging;// 是否拖动中
-	private boolean mExpanded = false;// 子菜单是否展开
 	private Context mContext;
 
 	private int position;// 按钮的位置
@@ -85,7 +84,8 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 		DisplayMetrics dm = new DisplayMetrics();
 		mWindowManager.getDefaultDisplay().getMetrics(dm);
 		mScreenWidth = dm.widthPixels;// 根据当前屏幕信息拿到屏幕的宽高
-		mScreenHeight = dm.heightPixels;
+		mScreenHeight = dm.heightPixels - getStatusBarHeight();
+		;
 
 		this.mWmParams = new WindowManager.LayoutParams();// 获取窗口参数
 
@@ -97,8 +97,7 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 		mWmParams.format = PixelFormat.RGBA_8888;// 当前窗口的像素格式为RGBA_8888,即为最高质量
 
 		// NOT_FOCUSABLE可以是悬浮控件可以响应事件，LAYOUT_IN_SCREEN可以指定悬浮球指定在屏幕内，部分虚拟按键的手机，虚拟按键隐藏时，虚拟按键的位置则属于屏幕内，此时悬浮球会出现在原虚拟按键的位置
-		mWmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-				| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+		mWmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 		// 默认指定位置在屏幕的左上方，可以根据需要自己修改
 		mWmParams.gravity = Gravity.LEFT | Gravity.TOP;
 		position = 1;
@@ -117,31 +116,46 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 		controlLayout.setOnTouchListener(this);
 
 		mHintView = (ImageView) findViewById(R.id.control_hint);
-		
+
 		mWindowManager.addView(this, mWmParams);
 
 		controlLayout.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!mDraging) {
-					mHintView
-							.startAnimation(createHintSwitchAnimation(mPathMenuLayout
-									.isExpanded()));
-					mPathMenuLayout.switchState(true);
-				}
+				 if (!mDraging) {
+	                    if (mPathMenuLayout.isExpanded()) {
+	                        mPathMenuLayout.switchState(false, position);
+	                        mHintView
+	                                .startAnimation(createHintSwitchAnimation(true));
+	                        mPathMenuLayout.setVisibility(GONE);
+	                    } else {
+	                        mHintView
+	                                .startAnimation(createHintSwitchAnimation(false));
+	                        mPathMenuLayout.setVisibility(VISIBLE);
+	                        mPathMenuLayout.setPosition(position);
+	                        postDelayed(new Runnable() {
+	                            @Override
+	                            public void run() {
+	                                mPathMenuLayout.switchState(true);
+	                            }
+	                        }, 60);
+
+	                    }
+	                }
 			}
 		});
-		//必须在绘制完成后才能获得控件的宽高
-		ViewTreeObserver vto = controlLayout.getViewTreeObserver();   
-        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() { 
-            @Override  
-            public void onGlobalLayout() { 
-            	controlLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this); 
-            	int controlLayoutWidth=controlLayout.getWidth();
-            	Log.i("menu", "controlLayoutWidth:"+controlLayoutWidth);
-            	mPathMenuLayout.setChildSize(controlLayoutWidth);
-            }   
-        });
+		// 必须在绘制完成后才能获得控件的宽高
+		ViewTreeObserver vto = controlLayout.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				controlLayout.getViewTreeObserver()
+						.removeGlobalOnLayoutListener(this);
+				int controlLayoutWidth = controlLayout.getWidth();
+				Log.i("menu", "controlLayoutWidth:" + controlLayoutWidth);
+				mPathMenuLayout.setChildSize(controlLayoutWidth);
+			}
+		});
 	}
 
 	/**
@@ -253,8 +267,8 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 			View item = mPathMenuLayout.getChildAt(i);
 			item.clearAnimation();
 		}
-
-		mPathMenuLayout.switchState(false);
+		mPathMenuLayout.switchState(false, position);
+		mPathMenuLayout.setVisibility(GONE);
 	}
 
 	/**
@@ -320,12 +334,17 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 			float mMoveStartX = event.getX();
 			float mMoveStartY = event.getY();
 			if (Math.abs(mTouchStartX - mMoveStartX) > 2
-
 			&& Math.abs(mTouchStartY - mMoveStartY) > 2) {
 				mDraging = true;
 				mWmParams.x = (int) (x - mTouchStartX);
 				mWmParams.y = (int) (y - mTouchStartY);
 				mWindowManager.updateViewLayout(this, mWmParams);
+				if (mPathMenuLayout.isExpanded()) {
+                    mHintView
+                            .startAnimation(createHintSwitchAnimation(true));
+                    mPathMenuLayout.switchState(false, position);
+                    mPathMenuLayout.setVisibility(GONE);
+                }
 				return false;
 			}
 			break;
