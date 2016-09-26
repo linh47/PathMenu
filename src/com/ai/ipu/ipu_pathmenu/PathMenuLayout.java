@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -290,6 +291,7 @@ public class PathMenuLayout extends ViewGroup {
 			long duration, Interpolator interpolator) {
 		AnimationSet animationSet = new AnimationSet(false);
 		animationSet.setFillAfter(true);
+		Log.i("menu", "shrink");
 		// 收缩过程中，child 逆时针自旋转360度
 		final long preDuration = duration / 2;
 		Animation rotateAnimation = new RotateAnimation(0, 360,
@@ -344,7 +346,7 @@ public class PathMenuLayout extends ViewGroup {
 				: new OvershootInterpolator(1.5f);
 		final long startOffset = computeStartOffset(childCount, mExpanded,
 				index, 0.1f, duration, interpolator);
-
+		Log.i("menu","bind child:expanded——"+mExpanded);
 		// mExpanded为true，已经展开，收缩动画；为false,展开动画
 		Animation animation = mExpanded ? createShrinkAnimation(0, toXDelta, 0,
 				toYDelta, startOffset, duration, interpolator)
@@ -440,7 +442,8 @@ public class PathMenuLayout extends ViewGroup {
         invalidate();
     }
 	 /**
-     * 切换中心按钮的展开缩小
+     * 切换中心按钮的展开缩小1
+     * showAnimation一定要设置成true才有动画效果
      */
     public void switchState(final boolean showAnimation, int position) {
         this.position = position;

@@ -124,10 +124,9 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 			public void onClick(View v) {
 				 if (!mDraging) {
 	                    if (mPathMenuLayout.isExpanded()) {
-	                        mPathMenuLayout.switchState(false, position);
+	                        mPathMenuLayout.switchState(true, position);
 	                        mHintView
 	                                .startAnimation(createHintSwitchAnimation(true));
-	                        mPathMenuLayout.setVisibility(GONE);
 	                    } else {
 	                        mHintView
 	                                .startAnimation(createHintSwitchAnimation(false));
@@ -268,7 +267,6 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 			item.clearAnimation();
 		}
 		mPathMenuLayout.switchState(false, position);
-		mPathMenuLayout.setVisibility(GONE);
 	}
 
 	/**
@@ -342,8 +340,7 @@ public class PathMenu extends FrameLayout implements OnTouchListener {
 				if (mPathMenuLayout.isExpanded()) {
                     mHintView
                             .startAnimation(createHintSwitchAnimation(true));
-                    mPathMenuLayout.switchState(false, position);
-                    mPathMenuLayout.setVisibility(GONE);
+                    mPathMenuLayout.switchState(true, position);
                 }
 				return false;
 			}
